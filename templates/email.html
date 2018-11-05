@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+    <title>__TITLE__</title>
+    <style type="text/css">		
+		body{
+            font-size: 14px;
+            font-family: arial;
+            font-weight: 400;
+            color: #333333;	
+		}	
+		
+		.txthost{
+            color:#0000AA;  
+		}
+		
+		.errr{
+            color:#DD0000;
+		}
+
+        .green{
+            color:#107000;
+        }
+
+        .red{
+            color:#A30000;
+        }
+
+        .grey{
+            color:#AAAAAA;
+        }
+
+        .warn{
+            color:#D74700;
+        }
+
+        .lok{
+            color:#FFFFFF;
+            background-color:#669933;
+            font-weight:600;
+        }
+
+        .lko{
+            color:#FFFFFF;
+            background-color:#CC3333;
+            font-weight:600;
+        }
+
+        .ok{
+            color:#FFFFFF;
+            background-color:#0C3300; 
+            font-weight:600; 
+        }	
+        
+        .ko{
+            color:#FFFFFF;
+            background-color:#A10008;
+            font-weight:600;
+        }                	
+			
+		.report td{
+            font-size:12px;
+            font-family:arial;
+            font-weight:400;
+            border-color:#AAAAAA;
+            border-width: 1px 1px 1px 1px;
+            border-top-style:dotted;
+            border-left-style:dotted;
+            border-right-style:solid;
+            border-bottom-style:solid;
+            margin:0;
+            padding:4px;
+		}
+		
+		.report td.separator{
+            border-width: 0px;
+		}
+		
+        .l{
+            float: left;
+        }		
+
+		.r{
+            float: right;
+		}
+        
+        .clear {
+            clear: both;
+        }
+
+        .header img {
+            float: left;
+        }
+
+        .header h1 {
+            position: relative;
+            top: 14px;
+            left: 10px;
+        }
+        
+        .header h3 {
+            position: relative;
+            left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+      <img src="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACxElEQVR42u2bP2hUQRCHv3sekiKE
+gEEkiJVYCOLVieIhapVCRIgxoAgG8U+lRRqFXxSxio1gYyEI5giKKAiijbFIChsvEDSK4JFSLI5D
+QjjCYZE1eSxr4d4V++7tlPNg2fl2Zt7OvHkFUiLUA5wDxoAS0E84sgosA6+Ah0K/OrFoIWV8CZgF
+9hG+1IEJoeftLrQtZfwHYJBsSA9wuky5NsfcYlseYNx+MSMnb8sacEDou+8CRRPzLuNbxtVagRjb
+b/Zre8It4Hw7HvAeKFv6BWBMaCWUoxbqA6aBi9aj38AOoabPuonJ9vbJB2W8AdAALgM161EvsNd3
+3cTxqquHZnwKwjqw9I/w8Abgiv2QpaP7S8i5RAARQASQbylmcM/LwIDjMpQPAEKTMQRCCgGhAeAM
+cBjYFaBX/S3qqsCs0FJHAAgBXAemzH08dBkBbgrNAFeF6t4hYIx/ZKqz3ox5/Vlg3niudw644ihL
+syT7gadC/w/A1OV3uyD/nQBGfHLASUf5uQ7cAV6y0aYK7bJXMuFq9zwv+AAYdujuC90O+fJkehzz
+ln7IJwfsdOjeZMDlF4CGbUvi6VK2NEO33ry57H0msRqMACKACCACiAAigAggAogAIoAIILcA7M/N
+203llBsAPy1dHzCUFwBF0yg4ZemfCd1go5feAppCtW71gMcO/SBQAb4AX4G33RwCr4F3uU2CJuGN
+A59z+xo0g8fDwEzeAGy2xc23snGhe8AoW9PiCbDS9QBSIJZwz+LFm2AEEAFEABFABBABRAC5B9DK
+MMikExtvOHSl0C0X2oPj7xgfAJ8cuimhY6G20ozxFceBVwsei+0GfuAesmwQ3rRIkirqbLlU8CT6
+ALiW8fz3DTjom7wmgY8ZNr4BjAqt+Y7KrgLHgRcZPfkjQlVI/T3eRoI5CkwAhwhzWhy2psUrwBOh
+zWHOPwPOn66T8TRtAAAAAElFTkSuQmCC" border="0" >
+      <h1>__TITLE__</h1>
+      <h3>__SUBTITLE__</h3>
+</div>    
+<div class="clear"></div>
+
+<table border="0" width="700">
+    <tr>
+        <td width="50%">
+            <br>
+            <b>HOST:<br>
+            <span class="txthost">__HOSTNAME__</span></b><br>
+        </td>
+        <td width="50%" align="right">
+            <br>
+            <b>IP v4:</b>__HOSTIP__/&nbsp;__HOSTMASK__<br>
+            __VMWARE-VERSION__<br>
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="2">
+            <br>
+            <span class=errr><b>__TESTMODE__</b></span>
+        </td>
+	</tr>        	
+	<tr>
+       <td colspan="2">&nbsp;</td>
+    </tr>
+</table>
+
+<table border="0" width="700" class="report">
+    <tr>
+        <td colspan="8">__REPORT-HEADER__<br></td>
+    </tr>
+    <tr>
+        <td><b>(Id)VM Name</b></td>
+        <td><b>State</b></td>
+        <td><b>Start time</b></td>
+        <td><b>End time</b></td>
+        <td><b>Duration</b></td>
+        <td><b>VM size (MB)</b></td>
+        <td><b>OVF size (MB)</b></td>
+        <td><b>Status</b></td>
+    </tr>
+    __REPORT-VMS__    
+</table>
+
+</body>
+</html>

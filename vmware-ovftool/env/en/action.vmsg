@@ -1,0 +1,19 @@
+# en_US resources
+signature="sIgNaTuRe"
+###
+###
+MethodAction.label            = "Method action"
+MethodAction.summary          = "Action invoked by standard entity APIs"
+###
+SendEmailAction.label         = "Send email"
+SendEmailAction.summary       = "Action to send an email"
+###
+SendSNMPAction.label          = "Send SNMP"
+SendSNMPAction.summary        = "Action to send a SNMP trap"
+###
+RunScriptAction.label         = "Run a script"
+RunScriptAction.summary       = "Action to run a server script"
+###
+CreateTaskAction.label        = "Create a task"
+CreateTaskAction.summary      = "Action to create a task"
+###

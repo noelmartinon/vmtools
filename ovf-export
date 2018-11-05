@@ -1,0 +1,181 @@
+#!/bin/sh
+##
+# Need ovftool
+# 1- Download it from vmware site
+# 2- Install on a linux os
+# 3- scp -r /usr/lib/vmware-ovftool root@esxi_srv:/vmfs/volumes/datastore1/vmtools/
+# 4- sed -i 's/bash/sh/' /vmfs/volumes/datastore1/vmtools/vmware-ovftool/ovftool
+#
+# examples use:
+# /vmfs/volumes/datastore1/vmtools/ovf-export --password="pwdesxi" --backup-point="/path/to/backups_dir" --backup-vms=myvm_name
+#
+# Add manually cron:
+# vi /var/spool/cron/crontabs/root
+# kill -HUP $(cat /var/run/crond.pid)
+# /usr/lib/vmware/busybox/bin/busybox crond
+# 
+# Set cron for the next boot:
+# vi /etc/rc.local.d/local.sh 
+#   /bin/echo '0   23    *   *   6   [ $(date +\%d) -le 07 ] && /vmfs/volumes/datastore1/vmtools/jobs/job1 > /tmp/ovf-export.$$' >> /var/spool/cron/crontabs/root
+#   /bin/kill $(cat /var/run/crond.pid)
+#   /usr/lib/vmware/busybox/bin/busybox crond                
+
+APPNAM="OVF-EXPORT"
+APPVER="1.0.0"
+COPYRIGHT="(C)2018 Noël MARTINON"
+LICENCE="GPL-2.0"
+
+BASEDIR=$(dirname "$0")
+ovftool="$BASEDIR/vmware-ovftool/ovftool"
+
+OLDIFS=$IFS
+ESX_VERSION=$(vmware -v | awk '{print $3}')
+ISTNET="$(esxcli network ip interface list | grep -E "^vmk*" | head -n1)"
+HOSTIP=$(esxcli network ip interface ipv4 get -i "${ISTNET}" | grep "${ISTNET}" | awk '{ print $2 }')
+HOSTMASK=$(esxcli network ip interface ipv4 get -i "${ISTNET}" | grep "${ISTNET}" | awk '{ print $3 }')
+
+# Include functions
+. "$BASEDIR"/inc/functions
+
+# Include sendmail script
+. "$BASEDIR"/inc/sendmail
+
+# Clear console
+echo -e "\033c"
+clear
+
+# Store arguments (value used by functions)
+argv=$@
+
+# Display application header
+echo -e "\e[104m################################################################################"
+echo -e "# \e[1m $APPNAM --$APPVER--\033[0m\e[104m | Export VM to OVF (C) 2018 Noel Martinon              #"
+echo -e "\e[104m################################################################################\033[0m	"
+echo -e
+
+# Check ovftool
+if [ ! -f "$ovftool" ]
+then
+    echo -e "\033[0;31mError: VMware 'ovtool' not found !\033[0m"
+    echo -e "\033[0;31mMore informations in README.md\033[0m"    
+    exit 1
+fi
+
+# Check arguments
+if [ $# -eq 0 ]
+then
+    echo -e "\033[0;31mError: must specify at least one argument\033[0m"
+    exit 1
+fi
+
+esxi_user=$( get_option "user" )
+if [ -z "$esxi_user"]
+then
+    esxi_user="root"
+    echo -e "\033[0;36mUsing 'root' as ESXi user\033[0m"
+fi
+
+esxi_password=$( get_option "password" )
+if [ -z "$esxi_password" ]
+then
+    echo -e "\033[0;31mError: must specify ESXi $esxi_user password\033[0m"
+    exit 1
+fi
+
+backupvms=$( get_option "backup-vms" )
+if [ -z "$backupvms" ]
+then
+    echo -e "\033[0;31mError: must specify list of VMs to backup\033[0m"
+    exit 1
+fi
+
+backuppoint=$( get_option "backup-point" )
+if [ -z "$backuppoint" ]
+then
+    echo -e "\033[0;31mError: must specify VMs backup point\033[0m"
+    exit 1
+fi
+
+testmode=$( get_option "test-mode" )
+shutdownwait=$( get_option "shutdown-wait" )
+smtpsrv=$( get_option "smtp-srv" )
+smtpport=$( get_option "smtp-port" )
+smtpusr=$( get_option "smtp-usr" )
+smtppwd=$( get_option "smtp-pwd" )
+mailfrom=$( get_option "mail-from" )
+mailto=$( get_option "mail-to" )
+subject=$( get_option "subject" )
+
+if [ -z "$subject" ]
+then
+    subject="ESXi / ovf export report"
+fi
+
+if [ "$testmode" == "true" ]
+then         
+    warning_testmode="TEST MODE ACTIVATED, REMOVE --test-mode=true TO MAKE A BACKUP"
+    echo -e "\033[0;33mTEST MODE ACTIVATED, REMOVE --test-mode=true TO MAKE A BACKUP\033[0m" 
+    subject=$subject" [Test mode]"      	
+fi
+
+# If process is already running then exit
+LOCKFILE=$BASEDIR/$(basename "$0").pid
+if [ -e ${LOCKFILE} ]; then
+    echo -e "\033[0;31mError: An ovf export is already running.\033[0m"
+    exit 1
+fi
+
+# In testmode=true then lockfile is ignored and not be deleted if it exist
+if [ "$testmode" != "true" ]
+then
+    # make sure the lockfile is removed when we exit and then claim it
+    trap "rm -f ${LOCKFILE}; exit" INT TERM EXIT
+    # Create lockfile
+    echo "Create lockfile ${LOCKFILE}"
+    echo $$ > ${LOCKFILE}
+fi
+
+# Start process
+PROCESS_START=$((`date +%s`))
+PROCESS_ERROR=0
+IFS=","
+for vmname in $backupvms
+do
+    vm_export "$vmname"
+    if [ $? -ne 0 ]
+    then
+        PROCESS_ERROR=1
+    fi
+done
+IFS=$OLDIFS  
+PROCESS_ELAPSE=$((`date +%s` - $PROCESS_START))
+ELAPSE=$( displaytime $PROCESS_ELAPSE )
+
+# Remove lock file (Just for security. Not necessary because 'trap' is used)
+if [ "$testmode" != "true" ] ; then
+    rm -f ${LOCKFILE}
+fi
+
+# Send emailmsg
+if [ "$PROCESS_ERROR" == "1" ]
+then
+    subject=$subject" - Error"
+fi
+
+emailmsg="$( cat $BASEDIR/templates/email.html )" 
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__TITLE__/$APPNAM $APPVER report/g" -e "s/__APPVER__/$HAPPVER/g" )
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__SUBTITLE__/$COPYRIGHT - $LICENCE/g" )
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__HOSTNAME__/$(hostname)/g" -e "s/__HOSTIP__/$HOSTIP/g" -e "s/__HOSTMASK__/$HOSTMASK/g" )
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__APPNAM__/$APPNAM/g" -e "s/__APPVER__/$HAPPVER/g" )
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__VMWARE-VERSION__/$(vmware -v)/g" )
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__TESTMODE__/$warning_testmode/g" )
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s/ *$//g" )
+# Below, sed uses separator '|' because '/' is in html string :
+REPORTHEADER="<b>Backup point:</b> $backuppoint<br><b>Total time:</b> Process done in $ELAPSE"
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s|__REPORT-HEADER__|$REPORTHEADER|g" )
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s|__REPORT-VMS__|$REPORT|g" )
+
+if [ "$smtpsrv" != "" ]
+then
+    sendMail "$smtpsrv" "$smtpport" "$smtpusr" "$smtppwd" "$mailfrom" "$mailto" "$subject" "$emailmsg"
+fi

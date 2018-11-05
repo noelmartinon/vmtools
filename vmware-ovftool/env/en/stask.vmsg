@@ -1,0 +1,64 @@
+# en_US resources
+signature="sIgNaTuRe"
+###
+###
+scheduler.RecurrentTaskScheduler.label                            = "<internal>"
+scheduler.RecurrentTaskScheduler.summary                          = "<internal>"
+scheduler.RecurrentTaskScheduler.frequency                        = "<internal>"
+###
+scheduler.DailyTaskScheduler.label                                = "Daily"
+scheduler.DailyTaskScheduler.summary                              = "Scheduled task will be triggered every day at a specific hour"
+scheduler.DailyTaskScheduler.frequency                            = "Hour"
+###
+scheduler.OnceTaskScheduler.label                                 = "Once"
+scheduler.OnceTaskScheduler.summary                               = "Scheduled task will be triggered once at a specific time"
+scheduler.OnceTaskScheduler.frequency                             = "Time"
+###
+scheduler.MonthlyByDayTaskScheduler.label                         = "Monthly (by day)"
+scheduler.MonthlyByDayTaskScheduler.summary                       = "Scheduled task will be triggered monthly on a specific day"
+scheduler.MonthlyByDayTaskScheduler.frequency                     = "Day"
+###
+scheduler.MonthlyByWeekdayTaskScheduler.label                     = "Monthly (by weekday)"
+scheduler.MonthlyByWeekdayTaskScheduler.summary                   = "Scheduled task will be triggered on a specific weekday of an offset week of the month"
+scheduler.MonthlyByWeekdayTaskScheduler.frequency                 = "Weekday within offset week"
+###
+scheduler.MonthlyTaskScheduler.label                              = "Monthly"
+scheduler.MonthlyTaskScheduler.summary                            = "Scheduled task will be triggered every month on a specific day"
+scheduler.MonthlyTaskScheduler.frequency                          = "Day"
+###
+scheduler.HourlyTaskScheduler.label                               = "Hourly"
+scheduler.HourlyTaskScheduler.summary                             = "Scheduled task will be triggered at a specific minute every hour"
+scheduler.HourlyTaskScheduler.frequency                           = "Minute"
+###
+scheduler.WeeklyTaskScheduler.label                               = "Weekly"
+scheduler.WeeklyTaskScheduler.summary                             = "Scheduled task will be triggered on a specific weekday every week"
+scheduler.WeeklyTaskScheduler.frequency                           = "Weekday"
+###
+scheduler.AfterStartupTaskScheduler.label                         = "After startup"
+scheduler.AfterStartupTaskScheduler.summary                       = "Scheduled task will be triggered a specific number of minutes after vCenter Server has started"
+scheduler.AfterStartupTaskScheduler.frequency                     = "Delay minutes"
+###
+Email.statefulAlarm.subject                                            = "[VMware vCenter - Alarm {alarmName}] {alarmName} changed status from {oldStatus} to {newStatus}"
+Email.statefulAlarm.body                                               =  "Target: {targetName}\nPrevious Status: {oldStatus}\nNew Status: {newStatus}\n\nAlarm Definition:\n{declaringSummary}\n\n{alarmValue}:\n {triggeringSummary}\n\nDescription:\n{eventDescription}"
+###
+Email.statefulEventAlarm.subject                                            = "[VMware vCenter - Alarm {alarmName}] {eventDescription}"
+Email.statefulEventAlarm.body                                               = "Target: {targetName}\nPrevious Status: {oldStatus}\nNew Status: {newStatus}\n\nAlarm Definition:\n{declaringSummary}\n\n{alarmValue}:\n {eventDescription}"
+###
+Email.statelessEventAlarm.subject                                           = "[VMware vCenter - Alarm {alarmName}] {eventDescription}"
+Email.statelessEventAlarm.body                                              = "Target: {targetName}\nStateless event alarm\n\nAlarm Definition:\n{declaringSummary}\n\n{alarmValue}:\n{eventDescription}"
+###
+
+### Localized Event Detail strings:
+event.Event.label                                                 = "Event"
+event.Date.label                                                  = "Date"
+event.UserName.label                                              = "User name"
+event.Vm.label                                                    = "VM"
+event.Host.label                                                  = "Host"
+event.ComputeResource.label                                       = "Resource pool"
+event.Datacenter.label                                            = "Data center"
+event.Datastore.label                                             = "Datastore"
+event.Network.label                                               = "Network"
+event.DVS.label                                                   = "vSphere Distributed Switch"
+###
+event.Arguments.label                                             = "Arguments"
+event.Summary.label                                               = "Summary"

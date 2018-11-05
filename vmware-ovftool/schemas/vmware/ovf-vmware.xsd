@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright 2008 VMware, Inc.  All rights reserved.
+
+    Remark: The OVF Specification 1.0 Annex D defines a set of relaxations on how 
+    this XML Schema 1.0 definition is to be interpreted.
+-->
+<xs:schema targetNamespace="http://www.vmware.com/schema/ovf"
+    xmlns:vmw="http://www.vmware.com/schema/ovf"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    attributeFormDefault="qualified"
+    elementFormDefault="qualified">
+
+    <!-- Include and import sections -->
+    <xs:import namespace="http://schemas.dmtf.org/ovf/envelope/1"
+        schemaLocation="../DMTF/dsp8027.xsd"/>
+
+    <xs:element name="IpAssignmentSection" type="vmw:IpAssignmentSection_Type"
+        substitutionGroup="ovf:Section">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Section since
+                IpAssignmentSection_Type is a derivation of Section_Type
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="IpAssignmentSection_Type">
+        <xs:annotation>
+            <xs:documentation>Specifies the IP Assignment policy that is
+            supported</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovf:Section_Type">
+                <xs:attribute name="schemes" type="xs:string" default="" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>List of supported IP assignment schemes. Valid
+                            values are: dhcp and ovfenv</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="protocols" type="xs:string" default="IPv4"
+                    use="optional">
+                    <xs:annotation>
+                        <xs:documentation>List of supported IP protocols. Valid values
+                            are: IPv4 and IPv6 </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:anyAttribute namespace="##any" processContents="lax"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="CpuCompatibilitySection" type="vmw:CpuCompatibilitySection_Type"
+        substitutionGroup="ovf:Section">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Section since
+                CpuCompatibilitySection_Type is a derivation of Section_Type
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="CpuCompatibilitySection_Type">
+        <xs:annotation>
+            <xs:documentation>CPU Architecture requirements for guest
+            software</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovf:Section_Type">
+                <xs:sequence>
+                    <xs:element name="Level" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:attribute name="level" type="xs:int" use="required"/>
+                            <xs:attribute name="vendor" type="xs:string" default=""
+                                use="optional"/>
+                            <xs:attribute name="eax" type="xs:string" use="optional"/>
+                            <xs:attribute name="ebx" type="xs:string" use="optional"/>
+                            <xs:attribute name="ecx" type="xs:string" use="optional"/>
+                            <xs:attribute name="edx" type="xs:string" use="optional"/>
+                            <xs:anyAttribute namespace="##any" processContents="lax"/>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##any" processContents="lax"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+</xs:schema>

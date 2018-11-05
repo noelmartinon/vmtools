@@ -1,0 +1,16 @@
+#!/bin/sh
+
+"/vmfs/volumes/datastore1/vmtools/ovf-deploy" \
+--user="root" \
+--password="pwdesxi" \
+--datastore="datastore1" \
+--smtp-srv="smtp.domain.tld" \
+--smtp-port=25 \
+--smtp-usr="user@domain.tld" \
+--smtp-pwd="smtppwd" \
+--mail-from="esxi-backup@domain.tld" \
+--mail-to="admin@domain.tld" \
+--subject="ESXi / Rapport de sauvegarde" \
+--ovf-file="/vmfs/volumes/datastore_ext/BACKUPS/myvm/myvm.ovf" \
+--vm-name="myvm"
+

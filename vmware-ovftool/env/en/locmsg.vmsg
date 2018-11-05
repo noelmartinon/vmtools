@@ -1,0 +1,287 @@
+# en_US resources
+signature="sIgNaTuRe"
+
+#
+# Licensing faults
+com.vmware.vim.license.error.featureUnavailable = "Feature '{feature.@enum.com.vmware.vim.license.Feature}' not licensed, requires {need} have {have}"
+com.vmware.vim.license.error.featureMissing = "Feature '{feature.@enum.com.vmware.vim.license.Feature}' is not licensed with this edition"
+com.vmware.vim.license.error.evalPeriodOver = "Evaluation period is over, {info.@enum.com.vmware.vim.license.msgs}"
+com.vmware.vim.license.error.LicenseExpired = "License Expired, {info.@enum.com.vmware.vim.license.msgs}"
+com.vmware.vim.license.error.BadInput = "License subsystem was called with invalid argument {vm}"
+com.vmware.vim.license.error.nolicense = "Please install a valid license to use this product"
+
+# Feature names defined in enum.vmsg
+com.vmware.vim.license.features.info = "{feature.@enum.com.vmware.vim.license.Feature}"
+
+#
+vim.hostd.vdisksvc.diskNotThinProvisioned = "The disk is not thin-provisioned."
+vim.hostd.vdisksvc.diskNotZeroedThick = "The disk is not a zeroed-thick disk."
+vim.hostd.vdisksvc.noIOBeyondEndOfDisk= "Cannot perform IO beyond end of the virtual disk."
+vim.hostd.vdisksvc.doesNotStartAtSectorZero = "Operation does not begin at sector 0."
+vim.hostd.vdisksvc.badReparentSpec = "The reparent specification is invalid."
+vim.hostd.vdisksvc.cannotMarkParentReadonly = "Cannot mark parent disk as read-only."
+vim.hostd.vdisksvc.diskSizeTooSmall = "The virtual disk size is too small."
+vim.hostd.vdisksvc.fileNameTooLong = "The file name is too long."
+vim.hostd.vdisksvc.attachRootLink = "Both parent and child virtual disks are base disks."
+
+#
+vim.hostd.hostsvc.invalidDiskPartitioningFormatChange = "Disk partitioning format change is not supported. Disk must be having non-vmware partitions."
+vim.hostd.hostsvc.invalidDiskSizeForPartitioningFormat = "Partitioning format does not support specified disk size."
+
+vim.hostd.hostsvc.HBA.ipv4.unsupportedEnabled = "IPv4 can not be enabled as it is unsupported by the host bus adapter."
+vim.hostd.hostsvc.HBA.ipv4.unsupportedDHCPSet = "IPv4 DHCP is not supported by the host bus adapter."
+vim.hostd.hostsvc.HBA.ipv4.invalidAddressAndNetmask = "Invalid IPv4 address and subnet mask configuration specified. Both values should be specified."
+vim.hostd.hostsvc.HBA.ipv4.unsupportedAddressAndNetmaskSet = "IPv4 address and subnet mask configuration is not supported by the host bus adapter."
+vim.hostd.hostsvc.HBA.ipv4.unsupportedDefaultGatewaySet = "IPv4 default gateway configuration is not supported by the host bus adapter."
+
+vim.hostd.hostsvc.HBA.ipv6.unsupportedEnabled = "IPv6 can not be enabled as it is unsupported by the host bus adapter."
+vim.hostd.hostsvc.HBA.ipv6.unspecifiedProperties = "IPv6 Properties must be specified for the host bus adapter."
+vim.hostd.hostsvc.HBA.ipv6.unsupportedDHCP = "IPv6 DHCP is not supported by the host bus adapter."
+vim.hostd.hostsvc.HBA.ipv6.unsupportedLinkLocalAutoConf = "IPv6 link local auto configuration method is not supported by the host bus adapter."
+vim.hostd.hostsvc.HBA.ipv6.unsupportedRouterAdvertisement = "IPv6 router advertisemnt configuration method is not supported by the host bus adapter."
+vim.hostd.hostsvc.HBA.ipv6.unsupportedDefaultGW = "IPv6 default gateway configuration is not supported by the host bus adapter."
+vim.hostd.hostsvc.HBA.ipv6.defaultGWNotApplicable = "IPv6 default gateway can't be set if either DHCPv6 or router advertisemnt method is to be used."
+vim.hostd.hostsvc.HBA.ipv6.invalidStaticAddressAdd = "Can't plumb IPv6 static addres if DHCPv6 and/or router advertisemnt method is to be used."
+vim.hostd.hostsvc.HBA.ipv6.invalidLinkLocalAddressAdd = "Can't plumb IPv6 link local address if auto link local configuration method is to be used."
+
+vim.hostd.hostsvc.HBA.common.unsupportedMTUSet = "MTU configuration is not supported by the host bus adapter."
+vim.hostd.hostsvc.HBA.common.unsupportedAprRedirect = "APR Redirect configuration is not supported by the host bus adapter."
+vim.hostd.hostdvc.HBA.common.unsupportedDNSSet = "DNS configuration is not supported by the host bus adapter."
+vim.hostd.hostdvc.HBA.common.invalidDNS = "Invalid primary and alternate DNS configuration specified. Both values should be specified."
+
+vim.hostd.hostsvc.lockedVmknics = "Vmknic {id} is protected from vCenter edits by host advanced option Config.HostAgent.plugins.hostsvc.lockedVmknics."
+vim.hostd.hostsvc.opUnsupportedOnEncryptedVm = "The operation is not supported on encrypted VM."
+
+#
+vim.hostd.snapshot.unknownuid = "The specified snapshot does not exist."
+vim.hostd.snapshot.inuse = "The specified snapshot file is in use."
+
+# Start NPIV related messages
+com.vmware.vim.npiv.lessNodeWwn.label = "Requested Node WWNs number {num1} should be greater than existing numbers {num2} in VM"
+com.vmware.vim.npiv.lessPortWwn.label = "Requested Port WWNs number {num1} should be greater than existing numbers {num2} in VM"
+# End NPIV related messages
+
+# Start property path validity checks error messages
+com.vmware.vim.propertyPath.error.managedObjectInPath = "Property name '{propName}' cannot traverse managed object for '{typeName}#{propPath}'."
+com.vmware.vim.propertyPath.error.unexpectedArray = "Property component '{propName}' did not expect an array in path '{typeName}#{propPath}'"
+com.vmware.vim.propertyPath.error.notAnObject = "Property name '{propName}' must refer to data or managed object for '{typeName}#{propPath}'."
+com.vmware.vim.propertyPath.error.notFound = "Property '{propName}' not found in path '{typeName}#{propPath}'."
+com.vmware.vim.propertyPath.error.stringKeyTypeMismatch.data = "Path component '{propName}' is not a data object with a STRING or MOREF key for '{typeName}#{propPath}'."
+com.vmware.vim.propertyPath.error.stringKeyTypeMismatch = "Path component '{propName}' is not a data object or MOREF key for '{typeName}#{propPath}'"}'."
+com.vmware.vim.propertyPath.error.intKeyTypeMismatch.data = "Path component '{propName}' is not a data object with an INT key for '{typeName}#{propPath}'."
+com.vmware.vim.propertyPath.error.intKeyTypeMismatch = "Path component '{propName}' is not a data object with a key for '{typeName}#{propPath}'."
+com.vmware.vim.propertyPath.error.notAnArray = "Path component '{propName}' is not an array in path '{typeName}#{propPath}'."
+com.vmware.vim.propertyPath.error.lenghAlreadySeen = "A property name cannot follow '{propName}' for '{typeName}#{propPath}'."
+# End property path validity checks error messages
+
+# HostCtlExceptions w/o Vobs
+com.vmware.esx.hostctl.default = "Operation failed, diagnostics report: {reason}"
+# End HostCtlException w/o Vobs
+
+# Start datastore related  messages
+com.vmware.vim.datastore.error.removeDatastoreFailed = "Cannot remove datastore '{name}' because {reason.@enum.com.vmware.vim.datastore.error.value}. Correct the problem and retry the operation."
+com.vmware.vim.datastore.error.tooManyDatastoresInStoragePod = "Cannot add more than {maxDatastores} datastores to a datastore cluster."
+com.vmware.vim.datastore.error.noDiskSpace = "Cannot find datastore with enough space to create new disk because intraVMDK affinity is set."
+# End datastore related messages
+
+# Start VM related messages
+com.vmware.vim.vm.error.removeDiskAfterVMSnapshot = "Cannot remove virtual disk from the virtual machine because it or one of its parent disks is part of a snapshot of the virtual machine."
+com.vmware.vim.vm.error.forkchild.extendDisk = "Extending virtual disk is not supported for fork child virtual machines."
+com.vmware.vim.vm.error.forkchild.updateSP = "Updating storage profile is not supported for fork child virtual machines."
+com.vmware.vim.vm.error.forkchild.addNonDiskDevice = "Adding new virtual device (except virtual disk) is not supported for fork child virtual machines."
+com.vmware.vim.vm.error.forkchild.removeDevice = "Removing existing virtual device is not supported for fork child virtual machines."
+com.vmware.vim.vm.error.vmMigrationInProgress = "The operation can not be performed because VM migration is in progress."
+com.vmware.vim.vm.error.invalidSecondary = "Cannot find the primary virtual machine for an FT secondary virtual machine."
+# End VM related messages
+
+# Start storage related  messages
+com.vmware.vim.datastore.error.unmountVmfsVolumeFailed = "Cannot unmount volume '{name}' because {reason.@enum.com.vmware.vim.datastore.error.value}. Correct the problem and retry the operation."
+# End storage related messages
+
+# Start iSCSI related messages
+com.vmware.vim.iscsi.error.vnicInUse = "This operation cannot be done while the VMkernel network adapter {name} is being used by iSCSI adapter. Remove the VMkernel network adapter from the iSCSI adapter to successfully complete this operation."
+com.vmware.vim.iscsi.error.AddUplinks =  "The VMkernel network adapter {name} is not associated with a physical network adapter. To use a VMkernel network adapter for iSCSI port binding, it must be associated with one a physical network adapter."
+com.vmware.vim.iscsi.error.MultipleUplinks = "The VMkernel network adapter {name} is associated with more than one physical network adapter. To use a VMkernel network adapter for iSCSI port binding, the VMkernel network adapter must be associated with only one physical network adapter."
+com.vmware.vim.iscsi.error.FixUplink = "Attach the physical network adapter to VMkernel network adapter {name} that is associated with the iSCSI Host Bus Adapter."
+com.vmware.vim.iscsi.error.VnicNotFound = "The VMkernel network adapter {name} might have been removed. Unbind this VMkernel network adapter."
+# End iSCSI related messages
+
+# Start CacheConfigurationManager messages
+com.vmware.vim.host.cacheConfiguration.swapSizeNegative = "Swap size cannot be negative."
+com.vmware.vim.host.cacheConfiguration.nonSsdDatastore = "Swap size can be configured only on Solid State Drive-based datastores."
+com.vmware.vim.host.cacheConfiguration.unsupportedDatastore = "Swap cannot be configured on the given datastore."
+# End CacheConfigurationManager messages
+
+# Start LocalAccountManager messages
+com.vmware.vim.host.LocalAccountManager.lastDcuiUser       = "Cannot remove last local user with DCUI access."
+com.vmware.vim.host.LocalAccountManager.lastLocalFullAdmin = "Cannot remove last local user with full administrative privileges."
+com.vmware.vim.host.LocalAccountManager.passwdError        = "Failed to set the password. It is possible that your password does not meet the complexity criteria set by the system."
+com.vmware.vim.host.LocalAccountManager.longPassword       = "This password may be too long for some services. Choose another."
+com.vmware.vim.host.LocalAccountManager.weakPassword       = "Weak password: {reason.@enum.com.vmware.vim.host.LocalAccountManager.weakPassword}."
+# End LocalAccountManager messages
+
+# Start InfraUpdateHa messages
+com.vmware.vim.host.unMonitored = "Host is not monitored by the following health update providers registered for this cluster: {providers}"
+com.vmware.vim.healthUpdateManager.duplicateName = "Duplicate name: {arg}"
+com.vmware.vim.healthUpdateManager.associatedEntity = "Entity {arg} is already associated."
+com.vmware.vim.healthUpdateManager.notAssociatedEntity = "Entity {arg} is not associated."
+com.vmware.vim.healthUpdateManager.unknownEntity = "Unknown entity: {arg}"
+com.vmware.vim.healthUpdateManager.greenUpdate = "Update {arg} has non-empty remediation for green status."
+com.vmware.vim.healthUpdateManager.grayUpdate = "Update {arg} has gray status."
+com.vmware.vim.healthUpdateManager.invalidComponent = "Component {arg} is invalid."
+com.vmware.vim.healthUpdateManager.stringBound = "String length exceeds bound: {arg}"
+# End InfraUpdateHa messages
+
+# Start AuthorizationManager messages
+com.vmware.vim.AuthorizationManager.lockdownModeProtection = "The operation breaks lockdown mode."
+com.vmware.vim.AuthorizationManager.lockdownModeDcui = "Cannot change the status of DCUI service when the host is in lockdown mode."
+# End AuthorizationManager messages
+
+# Start VR related messages
+com.vmware.vim.hbr.error.interop.faultTolerance = "vSphere Replication and Fault Tolerance cannot be enabled on the same virtual machine."
+com.vmware.vim.hbr.error.interop.diskLengthChange = "vSphere Replication does not support changing the length of a replicated disk."
+com.vmware.vim.hbr.error.interop.sharedBus = "vSphere Replication is not compatible with SCSI bus sharing."
+com.vmware.vim.hbr.error.interop.ideHostedEmulation = "vSphere Replication is not compatible with hosted IDE emulation."
+com.vmware.vim.hbr.error.fullsync.while.fullsync = "Cannot start a full sync because a full sync is already in progress."
+com.vmware.vim.hbr.error.fullsync.while.fullsync.server = "Cannot start a full sync because a full sync requested by the VR server is already in progress."
+com.vmware.vim.hbr.error.delta.while.fullsync = "Cannot start a delta because a full sync is already in progress."
+com.vmware.vim.hbr.error.delta.while.delta = "Cannot start a delta because a delta is already in progress."
+com.vmware.vim.hbr.error.interop.unsupportedDiskType = "vSphere Replication does not support the disk type for the '{diskName}' virtual disk."
+# End VR related messages
+
+# Start of OvfManager messages
+com.vmware.vim.ovfManager.ovfParserOption.lax = "Errors are treated as warnings, all sections are considered optional, and non-supported hardware is ignored."
+
+com.vmware.vim.ovfManager.ovfParserOption.mac = "The MAC address is exported for all ethernet devices."
+com.vmware.vim.ovfManager.ovfParserOption.uuid = "The UUID is exported for all virtual machines."
+com.vmware.vim.ovfManager.ovfParserOption.extraconf = "All extra configuration options are exported for a virtual machine."
+com.vmware.vim.ovfManager.ovfParserOption.nodevicesubtypes = "Resource subtypes for CD/DVD drives, floppy drives, and serial and parallel ports are not exported."
+
+# End of OvfManager messages
+
+# Replay check messages
+com.vmware.vim.vm.monitorTypeHotChange.notSupportedError = "Monitor build type change is not supported for online virtual machines."
+# End of Replay check messages
+
+# VM device messages
+com.vmware.vim.vm.device.video.hardware3dNotAvailable = "A hardware 3D renderer is not available on the host."
+# end of VM device messages
+
+#Start VmInventory messages
+com.vmware.vim.Folder.error.registeredVmLimitReached = "The maximum registered virtual machine limit has been reached."
+com.vmware.vim.Folder.error.supportedVmLimitReached = "The maximum supported virtual machine limit has been reached."
+#end of VmInventory messages
+
+# VM provisioning messages
+com.vmware.vim.vm.error.AttemptToFindUniqueDirectoryNameLimitReached = "The maximum attempts to find unique directory name limit has been reached."
+com.vmware.vim.vm.error.NoValidHostDueToDasState = "No valid hosts could be found due to Das state."
+com.vmware.vim.vm.error.NoValidHostDueToDatastoreAccess = "No valid hosts could be found due to datastore accessibility."
+com.vmware.vim.vm.error.NoValidHostDueToDiskSize = "No valid hosts could be found due to disk size '{disksize}'KB."
+com.vmware.vim.vm.error.NoValidHostDueToHwVersion = "No valid hosts could be found due to hardware version '{hwversion}'."
+com.vmware.vim.vm.error.NoValidHostDueToNVDIMMSupport = "No valid hosts could be found due to NVDIMM support."
+# End of VM provisioning messages
+
+#
+vim.hostd.vsanDecommissioning.enteringMM = "Entering VSAN maintenance mode."
+vim.hostd.vsanDecommissioning.noResources = "Failed to enter maintenance mode in the current VSAN data migration mode due to insufficient nodes or disks in the cluster. Retry operation in another mode or after adding more resources to the cluster."
+vim.hostd.vsanDecommissioning.invalidStateEnterMM = "Failed to enter maintenance mode in the current host state. Retry operation."
+vim.hostd.vsanDecommissioning.invalidStateExitMM = "Failed to exit maintenance mode in the current host state. Retry operation."
+vim.hostd.vsanDecommissioning.objectInaccessible = "Failed to enter maintenance mode due to one or more candidate objects for migration being currently inaccessible. Retry operation in a different VSAN data migration mode."
+vim.hostd.vsanDecommissioning.networkPartitionError = "Failed to enter maintenance mode due to loss of accessibility to some objects. Verify network connectivity and retry operation."
+vim.hostd.vsanDecommissioning.concurrentDecom = "Another host in the cluster is already entering maintenance mode. Retry operation after it completes."
+vim.hostd.vsanDecommissioning.canceledAborted = "User canceled maintenance mode operation or it failed due to an internal VSAN error. Retry operation."
+vim.hostd.vsanDecommissioning.generalError = "Failed to enter maintenance mode due to an internal VSAN error. Retry operation."
+vim.hostd.vsanDecommissioning.badParam = "Can not support operation in current state. Expected state '{expected}' but current state is '{current}'"
+vim.hostd.vsanDecommissioning.whatIfNotSupportedOnWitnessHost = "Query What-If evacuate result on witness host is not supported"
+vim.hostd.vsanDiskOperation.autoModeEnabled = "Can not remove VSAN disk: VSAN storage auto claim mode is enabled"
+vim.hostd.vsanDiskOperation.diskMappingNotFound = "Disk mapping '{diskMap}' not found."
+vim.hostd.vsanDiskOperation.allFlashExceed = "Cannot add disks to allFlash disk group, as vSAN disks reach maximum size."
+vim.hostd.vsanDiskOperation.hybridExceed = "Cannot add disks to hybrid disk group, as vSAN disks reach maximum size."
+
+# Start of VC health status messages
+vc.health.error.connToHealthStatusEndPointHttpError = "HTTP request failed; service: {0}, url: {1}, HTTP status: {2}"
+vc.health.error.HealthStatusEndPointRequestFailed = "Error obtaining health status; service: {0}, url: {1}, error: {2}"
+vc.health.statuscode = "{0} health is {1}"
+vc.health.error.dbjobexec = "Unable to determine status of performance statistics rollup in database"
+vc.health.error.dbjob1 = "Performance statistics rollup from Past Day to Past Week is not occurring in the database"
+vc.health.error.dbjob2 = "Performance statistics rollup from Past Week to Past Month is not occurring in the database"
+vc.health.error.dbjob3 = "Performance statistics rollup from Past Month to Past Year is not occurring in the database"
+vc.health.error.spacecheck = "Unable to monitor database storage usage. Refer to VMware KB 2078305 for details."
+vc.health.error.datafile = "Could not query table DBA_DATA_FILES. The vCenter Server database user account needs read privileges in order to monitor database storage usage. Refer to VMware KB 2078305 for details."
+vc.health.error.autoextend = "Autoextend is not turned on for the vCenter Server database tablespaces. Autoextend must be enabled for proper operation. Refer to VMware KB 2078305 for details."
+
+# End of VC health status messages
+
+### Start vpxd test email subject and body
+vpxd.email.smtp.test.subject = "Test SMTP Configuration Message Sent from: {from}"
+vpxd.email.smtp.test.body = "Test SMTP configuration message sent from: {from}\nSMTP server: {server}"
+### End vpxd test email subject and body
+
+#Start EnvironmentBrowser messages
+com.vmware.vim.EnvironmentBrowser.unknown.hardware.version = "EnvironmentBrowser can not complete query due to an unknown hardware version."
+#end of EnvironmentBrowser messages
+
+#Start mark disk ssd/local messages
+com.vmware.vim.hostsvc.storage.markDiskFailed = "Cannot mark disk {disk} as {desiredState.@enum.com.vmware.vim.hostsvc.markDisk.diskState}. {reason.@enum.com.vmware.vim.hostsvc.markDisk.fault}"
+#end of mark disk ssd/local message
+
+#Start VM PromoteDisk messages
+com.vmware.vim.vm.promoteDisk.error.vmInaccessible            = "Virtual machine is currently not accessible. Verify that VM's host is accessible and VM is powered on. Retry operation after that."
+com.vmware.vim.vm.promoteDisk.error.unrecoverableError        = "An unrecoverable error occurred while promoting a virtual disk. This condition can occur when VirtualMachine is continuously generating disk operations. Retry operation when IO load has reduced."
+com.vmware.vim.vm.promoteDisk.error.diskError                 = "A virtual disk is not present or valid. Retry operation."
+com.vmware.vim.vm.promoteDisk.error.hasSnapshots              = "The disks of the virtual machine have snapshots. Delete the snapshots and retry the operation."
+com.vmware.vim.vm.promoteDisk.error.numLinksError             = "The number of delta links is greater than one for one or more of the virtual disks. Delete the links and retry the operation."
+com.vmware.vim.vm.promoteDisk.error.invalidArguments          = "Ensure that offsetFromBottom is 0 and numLinks is 1"
+com.vmware.vim.vm.promoteDisk.error.online                    = "Promoting online disk is not supported. Power off {arg} and retry."
+#end of VM PromoteDisk messages
+
+#Start VCHA messages
+
+com.vmware.vim.vcha.error.invalidClusterNicConfig     = "Failed to get vCenter HA network information. Verify if vCenter HA interface (NIC1) is configured correctly and is reachable."
+com.vmware.vim.vcha.error.invalidFailoverNicConfig    = "Failed to get management network information. Verify if management interface (NIC0) is configured correctly and is reachable."
+com.vmware.vim.vcha.error.invalidPostgresConfig       = "PostgreSQL server is not configured correctly. Verify if PostgreSQL server is listening on address '{ipaddress}'."
+com.vmware.vim.vcha.error.cannotCreateCluster         = "Failed to create a vCenter HA cluster."
+com.vmware.vim.vcha.error.cannotCreateFile            = "Cannot create vCenter HA configuration file {filename} on node {ip}."
+com.vmware.vim.vcha.error.failedBringUpIf             = "Failed to bring up management interface (NIC0). Check system logs and engage GSS if needed."
+com.vmware.vim.vcha.error.clusterInStateTransition    = "Cannot process the request. Conflicting state transition operation is detected. Please retry later."
+com.vmware.vim.vcha.error.invalidModeForRequest       = "Cannot process the request when vCenter HA is disabled."
+com.vmware.vim.vcha.error.invalidNodeCountForRequest  = "Cannot process the request when vCenter HA cluster has less than 3 nodes. Please check if node {nodeip} is configured and is reachable."
+com.vmware.vim.vcha.error.clusterAlreadyPresetup      = "vCenter Server has already been preconfigured for vCenter HA deployment."
+com.vmware.vim.vcha.error.clusterNotPresetup          = "vCenter Server has not been preconfigured for vCenter HA deployment. Please refer to the prerequisites for vCenter HA deployment."
+com.vmware.vim.vcha.error.clusterAlreadyConfigured    = "vCenter HA is already configured."
+com.vmware.vim.vcha.error.clusterNotConfigured        = "vCenter HA is not configured."
+com.vmware.vcha.health.replication.postgresql.norepl             = "PostgreSQL replication is not in progress."
+com.vmware.vcha.health.replication.postgresql.mode.sync          = "PostgreSQL replication mode is Synchronous."
+com.vmware.vcha.health.replication.postgresql.mode.async         = "PostgreSQL replication mode is Asynchronous."
+com.vmware.vcha.health.replication.postgresql.hasdataloss        = "PostgreSQL replication on the Passive node is catching up with the Active node."
+com.vmware.vcha.health.replication.file.state         = "Appliance {fileProviderType} is {state}."
+com.vmware.vcha.replication.disabled                  = "Appliance state replication is disabled."
+com.vmware.vim.vcha.error.embeddedNode                = "Cannot enable vCenter HA with Embedded PSC."
+com.vmware.vim.vcha.error.embeddedDb                  = "Cannot enable vCenter HA with an external database."
+com.vmware.vim.vcha.error.sshdNotRunning              = "vCenter HA requires SSH daemon to be running. Enable SSH before you can configure vCenter HA."
+com.vmware.vim.vcha.error.opRunning                   = "An operation to create or modify the vCenter HA cluster is already in progress."
+com.vmware.vim.vcha.error.passiveExists               = "The Passive node already exists in vCenter HA cluster. Refer to vCenter HA settings."
+com.vmware.vim.vcha.error.witnessExists               = "The Witness node already exists in vCenter HA cluster. Refer to vCenter HA settings."
+com.vmware.vcha.cluster.nic.not.created               = "Failed to create vCenter HA network adapter on the vCenter Server. Check system logs and engage GSS if needed."
+com.vmware.vcha.error.failedGetPassiveIp              = "Failed to get the failover IP address on the Passive node. Verify if {passiveip} is up and reachable from the Active node."
+com.vmware.vcha.checkPassiveWitness                   = "Verify if the Passive and the Witness nodes are up and reachable."
+com.vmware.vcha.waitForPassiveCatchUp                 = "This could be a transient condition. Wait for the Passive node to catchup. If the issue persists, verify the network connectivity between the Active and the Passive nodes."
+com.vmware.vcha.activeIsolated                        = "Active node in vCenter HA cluster is isolated."
+com.vmware.vcha.checkPassiveDb                        = "Verify if PostgreSQL server is running on the Passive node and that the Passive node is reachable on the vCenter HA network."
+com.vmware.vcha.nodeLoss                              = "vCenter HA cluster has lost a node. Refer to vCenter HA settings for more details."
+com.vmware.vcha.error.ipNotSameFamily                 = "Must have identical IP address family for the Active, Passive and Witness nodes."
+com.vmware.vcha.error.differentClusterIp              = "The vCenter HA network IP address you specified is different than the original IP address used to configure vCenter HA. You must use the same IP address."
+com.vmware.vcha.error.differentFailoverIp             = "The management interface (NIC0) IP address you specified for the Passive node is different than the original IP address used to configure vCenter HA. You must use the same IP address."
+com.vmware.vcha.error.tooManyAddress                  = "Only one IPv6 address is allowed on the vCenter HA network interface. Remove additional IPv6 addresses and retry."
+com.vmware.vcha.error.unresolvedFailoverIp            = "The management interface (NIC0) IP address does not map to the vCenter Server PNID."
+com.vmware.vcha.error.bothNetworksInSameSubnet        = "The Management interface (NIC0) and vCenter HA interface (NIC1) must be in different subnets."
+com.vmware.vcha.error.vchaReqsVmOneDs                 = "vCenter HA does not support an Active node having disks on more than one datastore."
+com.vmware.vcha.error.vchaReqsHostMatchDs             = "One or more hosts used for vCenter HA deployment have datastores not mounted on the host."
+com.vmware.vcha.error.vchaDrsHosts                    = "The DRS cluster used for the deployment of vCenter HA nodes must have at least three hosts."
+com.vmware.vcha.error.pnidHostnameMismatch            = "The hostname for {nodeIp} does not map to the vCenter Server PNID. Review the hostname you specified during the VM clone customization step."
+#End VCHA messages
+
+# Start HA messages.
+com.vmware.vc.HA.error.restartDisabledVmInChain       = "Restart disabled VM {arg} in dependency chain."
+com.vmware.vc.HA.error.vmInDependencyRule             = "VM {arg} has hard dependencies with other VMs in the cluster."
+# End HA messages.

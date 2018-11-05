@@ -1,0 +1,192 @@
+#!/bin/sh
+##
+# Need ovftool
+# 1- Download it from vmware site
+# 2- Install on a linux os
+# 3- scp -r /usr/lib/vmware-ovftool root@esxi_srv:/vmfs/volumes/datastore1/vmtools/
+# 4- sed -i 's/bash/sh/' /vmfs/volumes/datastore1/vmtools/vmware-ovftool/ovftool
+#
+# examples use:
+# /vmfs/volumes/datastore1/vmtools/ovf-deploy --password="pwdesxi" --ovf-file="/path/to/file.ovf" --vm-name="new_vm_name"
+
+APPNAM="OVF-DEPLOY"
+APPVER="1.0.0"
+COPYRIGHT="(C)2018 Noël MARTINON"
+LICENCE="GPL-2.0"
+
+BASEDIR=$(dirname "$0")
+ovftool="$BASEDIR/vmware-ovftool/ovftool"
+
+OLDIFS=$IFS
+ESX_VERSION=$(vmware -v | awk '{print $3}')
+ISTNET="$(esxcli network ip interface list | grep -E "^vmk*" | head -n1)"
+HOSTIP=$(esxcli network ip interface ipv4 get -i "${ISTNET}" | grep "${ISTNET}" | awk '{ print $2 }')
+HOSTMASK=$(esxcli network ip interface ipv4 get -i "${ISTNET}" | grep "${ISTNET}" | awk '{ print $3 }')
+
+# Include functions
+. "$BASEDIR"/inc/functions
+
+# Include sendmail script
+. "$BASEDIR"/inc/sendmail
+
+# Clear console
+echo -e "\033c"
+clear
+
+# Store arguments (value used by functions)
+argv=$@
+
+# Display application header
+echo -e "\e[104m################################################################################"
+echo -e "# \e[1m $APPNAM --$APPVER--\033[0m\e[104m | Deploy OVF to VM (C) 2018 Noel Martinon              #"
+echo -e "\e[104m################################################################################\033[0m	"
+echo -e
+
+# Check ovftool
+if [ ! -f "$ovftool" ]
+then
+    echo -e "\033[0;31mError: VMware 'ovtool' not found !\033[0m"
+    echo -e "\033[0;31mMore informations in README.md\033[0m"    
+    exit 1
+fi
+
+# Check arguments
+if [ $# -eq 0 ]
+then
+    echo -e "\033[0;31mError: must specify at least one argument\033[0m"
+    exit 1
+fi
+
+esxi_user=$( get_option "user" )
+if [ -z "$esxi_user"]
+then
+    esxi_user="root"
+    echo -e "\033[0;36mUsing 'root' as ESXi user\033[0m"
+fi
+
+esxi_password=$( get_option "password" )
+if [ -z "$esxi_password" ]
+then
+    echo -e "\033[0;31mError: must specify ESXi $esxi_user password\033[0m"
+    exit 1
+fi
+
+datastore=$( get_option "datastore" )
+if [ -z "$datastore" ]
+then
+    datastore="datastore1"
+    echo -e "\033[0;36mUsing 'datastore1' as destination datastore\033[0m"
+fi
+
+ovffile=$( get_option "ovf-file" )
+if [ -z "$ovffile" ]
+then
+    echo -e "\033[0;31mError: must specify OVF file name\033[0m"
+    exit 1
+fi
+
+if [ ! -f "$ovffile" ]; then
+    echo -e "\033[0;31mError: OVF file not found !\033[0m"
+    exit 1
+fi
+
+vmname=$( get_option "vm-name" )
+if [ -z "$vmname" ]
+then
+    echo -e "\033[0;31mError: must specify a destination VM name\033[0m"
+    exit 1
+fi
+
+
+[ ! -w "/vmfs/volumes/datastore_ext/intra/intra-disk1.vmdk" ] && (echo -e "\033[0;31mError: OVF file is not writable !!!'\033[0m" ; exit 1)
+
+
+# Fix deployment issue "Failed to deploy OVF package: The task was canceled by a user"
+# See https://communities.vmware.com/message/2172950#2172950
+grep "vmware\.cdrom\.iso" "$ovffile" 1>/dev/null
+if [ $? -eq 0 ]
+then
+    echo -e "\033[0;33mModify OVF file to 'cdrom.atapi' and update checksum in MF file\033[0m"
+
+    mffile="${ovffile%.*}.mf"  # contains SHA1 checksums of the .OVF and .VMDK
+    extension="${ovffile##*.}" # ovf or ova
+
+    cp -f "$ovffile" "$ovffile.bak" 2>/dev/null
+    cp -f "$mffile" "$mffile.bak" 2>/dev/null
+
+    [ ! -f "$ovffile.bak" -o ! -f "$mffile.bak" ] && \
+    echo -e "\033[0;31mError: OVF and MF files can not be saved be before modification'\033[0m" && exit 1
+
+    [ ! -w "$ovffile" ] && echo -e "\033[0;31mError: OVF file is not writable'\033[0m" && exit 1
+    [ ! -w "$mffile" ] && echo -e "\033[0;31mError: MF file is not writable'\033[0m" && exit 1
+
+    sed -i "s/vmware\.cdrom\.iso/vmware\.cdrom\.atapi/g" "$ovffile" 2>/dev/null
+    sum=$(sha256sum "$ovffile" | awk '{ print $1 }')
+    sed -e "/\.$extension/s/= .*/= $sum/" "$mffile" 2>/dev/null
+
+    grep "vmware\.cdrom\.atapi" "$ovffile"
+    if [ $? -ne 0 ]
+    then
+        echo -e "\033[0;31mError: OVF file could not be modified'\033[0m"
+        exit 1
+    fi
+fi
+
+testmode=$( get_option "test-mode" )
+smtpsrv=$( get_option "smtp-srv" )
+smtpport=$( get_option "smtp-port" )
+smtpusr=$( get_option "smtp-usr" )
+smtppwd=$( get_option "smtp-pwd" )
+mailfrom=$( get_option "mail-from" )
+mailto=$( get_option "mail-to" )
+subject=$( get_option "subject" )
+
+if [ -z "$subject" ]
+then
+    subject="ESXi / ovf deploy report"
+fi
+
+if [ "$testmode" == "true" ]
+then         
+    warning_testmode="TEST MODE ACTIVATED, REMOVE --test-mode=true TO MAKE A DEPLOY"
+    echo -e "\033[0;33mTEST MODE ACTIVATED, REMOVE --test-mode=true TO MAKE A DEPLOY\033[0m" 
+    subject=$subject" [Test mode]"      	
+fi
+
+# Start process
+PROCESS_START=$((`date +%s`))
+PROCESS_ERROR=0
+vm_deploy "$datastore" "$vmname" "$ovffile"
+if [ $? -ne 0 ]
+then
+    PROCESS_ERROR=1
+fi
+PROCESS_ELAPSE=$((`date +%s` - $PROCESS_START))
+ELAPSE=$( displaytime $PROCESS_ELAPSE )
+
+# Send emailmsg
+if [ "$PROCESS_ERROR" == "1" ]
+then
+    subject=$subject" - Error"
+fi
+
+emailmsg="$( cat $BASEDIR/templates/email.html )" 
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__TITLE__/$APPNAM $APPVER report/g" -e "s/__APPVER__/$HAPPVER/g" )
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__SUBTITLE__/$COPYRIGHT - $LICENCE/g" )
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__HOSTNAME__/$(hostname)/g" -e "s/__HOSTIP__/$HOSTIP/g" -e "s/__HOSTMASK__/$HOSTMASK/g" )
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__APPNAM__/$APPNAM/g" -e "s/__APPVER__/$HAPPVER/g" )
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__VMWARE-VERSION__/$(vmware -v)/g" )
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__TESTMODE__/$warning_testmode/g" )
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s/ *$//g" )
+# Below, sed uses separator '|' because '/' is in html string :
+REPORTHEADER="<b>OVF source:</b> $ovffile<br><b>Total time:</b> Process done in $ELAPSE"
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s|__REPORT-HEADER__|$REPORTHEADER|g" )
+emailmsg=$( echo -n "${emailmsg}" | sed -e "s|__REPORT-VMS__|$REPORT|g" )
+
+if [ "$smtpsrv" != "" ]
+then
+    sendMail "$smtpsrv" "$smtpport" "$smtpusr" "$smtppwd" "$mailfrom" "$mailto" "$subject" "$emailmsg"
+fi
+
+
+

@@ -1,0 +1,209 @@
+#!/bin/sh
+
+# usage sendMail smtpsrv smtpport smptuser smtppwd mailfrom mailto subject message
+
+OLDIFS=$IFS
+
+###############################################
+#   BASE64 KSH NATIVE ENCODING FUNCTIONS      #
+###############################################
+
+        base64arr="A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h i j k l m n o p q r s t u v w x y z 0 1 2 3 4 5 6 7 8 9 + /"
+
+        a=0
+        IFS=" "
+        for car in $base64arr
+        do
+            eval char$a=$car
+        a=$(($a+1))
+        done
+        IFS=$OLDIFS
+
+    dec_to_bin(){
+
+        n=$1
+        b=1
+        while [ $n -ge 2 ]
+        do
+            binstr="$(($n % 2))"$binstr
+        n=$(($n/2))
+        b=$(($b+1))
+        done
+        echo $( printf "%0$(($(($b/8+1))*8))d" $(echo $n$binstr | sed 's/^0*//') )
+    }
+
+    bin_to_dec(){
+
+        binnum=$1
+        c=0
+        while [ $c -lt ${#binnum} ]
+        do
+        p=$((${#binnum}-$c-1))
+            decnum=$(($decnum+$(($((${binnum:$c:1}))*$((2**$p))))))
+        c=$(($c+1))
+        done
+        echo $decnum
+    }
+
+    bin_to_b64(){
+
+        binstr=$1
+        u=0
+        while [ $u -lt ${#binstr} ]
+        do
+            b64str=$b64str$( eval echo \$char$(bin_to_dec `echo ${binstr:$u:6} | sed -e :a -e 's/^.\{1,5\}$/&0/;ta'`) )
+        u=$(($u+6))
+        done
+        echo $b64str
+    }
+
+    base64_encode(){
+
+        rawstr=$@
+        linewidth=64
+        s=0
+        while [ $s -lt ${#rawstr} ]
+        do
+            binout=$binout$( dec_to_bin `printf "%d\n" \'"${rawstr:$s:1}"` )
+        s=$(($s+1))
+        done
+        b64out=$( bin_to_b64 $binout )
+        app=0
+        if [[ $(( ${#rawstr}%3 )) -ne 0 ]]
+        then
+            while [ $app -lt $(( 3-${#rawstr}%3 )) ]
+            do
+                b64out=$b64out"="
+            app=$(($app+1))
+            done
+        fi
+        echo $b64out
+    }
+
+##########
+
+LOCAL_DELAY=2
+
+sendMail() {
+    smtpsrv=$1
+    smtpport=$2
+    smtpusr=$3
+    smtppwd=$4
+    mailfrom=$5
+    mailto=$6   #comma separated values
+    subject=$7
+    message=$8
+    
+    echo -e "\e[1mStarting send mail process\033[0m"
+    
+    if [ "$smtpsrv" == "" ]
+    then
+    	echo -e "Error: a --smtp-srv is required"
+    fi
+
+    if [ "$smtpport" == "" ]
+    then
+        echo -e "Error: a --smtp-port is required"
+    fi	
+    
+    if [ "$mailfrom" == "" ]
+    then
+        echo -e "Error: a --mail-from e-mail address is required"
+    fi	
+
+    if [ "$mailto" == "" ]
+    then
+        echo -e "Error: a --mail-to e-mail address is required"
+    fi
+    
+    if [ "$subject" == "" ]
+    then
+        echo -e "Error: a --subject is required"
+    fi
+    
+    if [ "$message" == "" ]
+    then
+        echo -e "Error: HTML content is needed to send the e-mail"
+    fi
+    
+    if [ "$smtpsrv" == "" -o "$smtpport" == "" -o "$mailfrom" == "" -o "$mailto" == "" -o "$subject" == "" -o "$message" == "" ]
+    then
+        echo -e "\033[0;31mError: cannot determine the e-mail server credentials\033[0m"
+        return 1
+    fi
+        
+
+    mail_input() {
+        echo -ne "EHLO ${smtpsrv}\r\n"
+        sleep ${LOCAL_DELAY}
+        if [ "$smtpusr" != "" ]
+        then        
+            echo -ne "AUTH LOGIN\r\n"
+            sleep ${LOCAL_DELAY}
+            echo -ne "$( base64_encode ${smtpusr} )\r\n"
+            sleep ${LOCAL_DELAY}
+            echo -ne "$( base64_encode ${smtppwd} )\r\n"
+            sleep ${LOCAL_DELAY}
+        fi
+        echo -ne "MAIL FROM: <${mailfrom}>\r\n"
+        sleep ${LOCAL_DELAY}
+        #echo -ne "RCPT TO: <${mailto}>\r\n"
+        #sleep ${LOCAL_DELAY}
+        IFS=","
+        for email in ${mailto}
+        do
+            echo -ne "RCPT TO: <${email}>\r\n"
+            sleep ${LOCAL_DELAY}
+        done
+        IFS=$OLDIFS
+        echo -ne "DATA\r\n"
+        sleep ${LOCAL_DELAY}
+        echo -ne "From: ${mailfrom}\r\n"
+        sleep ${LOCAL_DELAY}
+        echo -ne "To: ${mailto}\r\n"
+        sleep ${LOCAL_DELAY}
+        echo -ne "Subject: ${subject}\r\n"
+        sleep ${LOCAL_DELAY}
+        echo -ne "Content-type: text/html\r\n"
+        sleep ${LOCAL_DELAY}
+        echo -ne "MIME-Version: 1.0\r\n"
+        sleep ${LOCAL_DELAY}
+        echo -ne "${message}"
+        sleep ${LOCAL_DELAY}
+        echo -ne "\r\n.\r\n"
+        sleep ${LOCAL_DELAY}
+        echo -ne "quit\r\n"
+    }
+
+    # Set firewall rules
+    FWRes=$( esxcli network firewall ruleset list | grep "SMTPout-$smtpport" )
+    [ "$FWRes" == "" ] && {
+        chmod 644 /etc/vmware/firewall/service.xml                                                        
+        chmod +t /etc/vmware/firewall/service.xml
+
+        FWRule="<service id='9999'>\n
+        <id>SMTPout-$smtpport</id>\n
+        <rule id='0000'>\n
+        <direction>outbound</direction>\n
+        <protocol>tcp</protocol>\n
+        <porttype>dst</porttype>\n
+        <port>"$smtpport"</port>\n
+        </rule>\n                                                                                        
+        <enabled>true</enabled>\n                                                                        
+        <required>false</required>\n                                                                      
+        </service>\n                                                                                      
+        </ConfigRoot>"
+        sed -i "s:<\/ConfigRoot>:${FWRULE}:g" "/etc/vmware/firewall/service.xml"
+        chmod 444 /etc/vmware/firewall/service.xml
+        esxcli network firewall refresh
+    }
+    
+    echo -e "Opening port $smtpport for SMTPout-$smtpport service..."    
+    esxcli network firewall ruleset set --ruleset-id=SMTPout-$smtpport --enabled=true
+
+    echo -e "Sending mail..."
+    mail_input | nc -v -i 1 ${smtpsrv} ${smtpport} #>/dev/null 2>/dev/null    
+      
+    esxcli network firewall ruleset set --ruleset-id=SMTPout-$smtpport --enabled=false
+    echo -e "Firewall rule SMTPout-$smtpport closed."
+}

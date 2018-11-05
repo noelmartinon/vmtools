@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Add cron and restart cron daemon:
+# echo '0   23    *   *   6   /vmfs/volumes/datastore1/vmtools/jobs/job_example > /tmp/ovf-export.log' >> /var/spool/cron/crontabs/root
+# /bin/kill $(cat /var/run/crond.pid) ; /usr/lib/vmware/busybox/bin/busybox crond
+
+"/vmfs/volumes/datastore1/vmtools/ovf-export" \
+--user="root" \
+--password="pwdesxi" \
+--smtp-srv="smtp.domain.tld" \
+--smtp-port=25 \
+--smtp-usr="user@domain.tld" \
+--smtp-pwd="smtppwd" \
+--mail-from="esxi-backup@domain.tld" \
+--mail-to="admin@domain.tld" \
+--subject="ESXi / Rapport de sauvegarde" \
+--backup-point="/vmfs/volumes/datastore_ext/BACKUPS" \
+--backup-vms="server1,server2"
+

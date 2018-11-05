@@ -1,0 +1,416 @@
+#!/bin/sh
+
+newline=$'\012'
+
+# --------------------------------
+getVMName(){
+    if [ -z "$2" ] || [ $( echo "$2" | grep -oE "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$" | wc -l ) -eq 0 ]
+    then
+        VMNAME=$( vim-cmd vmsvc/get.config $1 | grep name | head -n1 | awk -F '=' '{print $2}' | awk -F ',' '{print $1}' | sed -e 's/^ *//g' -e 's/ *$//g' -e 's/\"//g' )
+    else
+        if [ "$3" -eq "$3" ] 2>/dev/null
+        then
+            port="$3"
+        else
+            port="22"
+        fi
+        VMNAME=$( eval ssh "$SSHOPTS" -p "$3" ${defremusr}@"$2" "vim-cmd vmsvc/get.config $1 | grep name | head -n1 | awk -F '=' '{print \$2}'| awk -F '\,' '{print \$1}'| sed -e 's/^ *//g' -e 's/ *$//g' -e 's/\"//g'" 2>/dev/null )
+        VMNAME="$( echo "$VMNAME" | sed '/FIPS mode initialized/d' )"
+    fi
+    echo "$VMNAME"
+}
+
+# --------------------------------
+getVMFoldersById(){
+    vmFolders="$( vim-cmd vmsvc/get.filelayout $1 | grep -E '^[ \t].*\"\[.*.vmdk.*' | sed -e 's/\"//g' -e 's/\,//g' -e 's/\[//g' -e 's/\] /\//g' | awk '{print $0}' | sed -e 's/^ *//g' -e 's/ *$//g' | awk '{print "/vmfs/volumes/"$0}' | awk -F '/' 'sub(FS $NF,x)' | sort -u )"
+    echo "$vmFolders"
+}
+
+# --------------------------------
+getAllFiles(){
+    gFolders="$( getVMFoldersById $1 )"
+    if [ "$gFolders" != "" ]
+    then
+        IFS=$newline
+        for folder in $gFolders
+        do
+        for fvmdk in "$folder"/*.vmdk
+        do
+            if [ -f "$fvmdk" ]
+            then
+                echo "DISK=${fvmdk}"
+            fi        
+        done
+        for fvmsn in "$folder"/*.vmsn
+        do
+            if [ -f "$fvmsn" ]
+            then
+                echo "DISK=${fvmsn}"
+            fi          
+        done    
+        done
+        IFS=$OLDIFS
+    fi
+}
+
+# --------------------------------
+getVMDiskExclusions(){
+    vmname="$( getVMName $1 )"
+    IFS=","
+    for evm in $backupvms
+    do
+        evmn="$( echo "$evm" | awk -F '!' '{print $1}' )"
+        exvm="$( echo "$evm" | awk -F '!' '{print $2}' )"
+        if [ "$evmn" == "$vmname" -a "$exvm" != "" ]
+        then
+            vmdk2exclude="$exvm"
+        fi
+    done
+    IFS=$OLDIFS
+    echo "${vmdk2exclude//.vmdk/}"
+}
+
+# --------------------------------
+isDiskExcluded(){
+    vmdk2exclude="$( getVMDiskExclusions $1 )"
+    echo "$( echo "$vmdk2exclude" | awk -F ';' -v a="(-[0-9]{6})?(-flat|-sesparse|-delta)?.vmdk" -v b="$2" '{for(i=1;i<=NF;i++){if(b~$i a){print $i}}}' | wc -l )"
+}
+
+# --------------------------------
+getVMSize(){
+    realsize="0"
+    aparentsize="0"
+    diskpaths=$(getAllFiles $1)
+    if [ "$diskpaths" != "" ]
+    then
+        FILES=""
+            IFS=$newline
+            for disk in $diskpaths
+            do
+                path="$( echo "$disk" | awk -F '=' '{print $2}' )"
+                path=${path//\"/}
+                diskname="$( basename "$path" )"
+                if [ "$( isDiskExcluded $1 "$diskname" )" -eq "0" ]
+                then
+                    if [ -f "$path" ]
+                    then
+                        FILES="${FILES}${path};"
+                        vmdksize=$( du -ms "$path" | awk '{print $1}' )
+                        aparentb=$( ls -la "$path" | awk '{print $5}' )
+                        aparentm=$(( $aparentb/1024/1024 ))
+                    else
+                        vmdksize=0
+                    fi
+                    realsize=$(( $realsize+$vmdksize ))
+                    disksize=$(( $disksize+$aparentm ))
+                fi
+            done
+            IFS=$OLDIFS
+        if [ "$realsize" -eq "$realsize" ] 2>/dev/null
+        then
+            realsize=$realsize
+        else
+            realsize=0
+        fi
+            if [ "$aparentsize" -eq "$aparentsize" ] 2>/dev/null
+            then
+                aparentsize=$disksize
+            else
+                aparentsize=0
+            fi
+        echo "$realsize"-"$aparentsize"        
+    else
+        echo "null-null"
+    fi
+    }
+
+# --------------------------------
+get_option(){
+    arg="--$1="
+    val=$( echo "$argv" | awk -F $arg '{print $2}' | awk -F '--' '{print $1}' )
+    echo $val
+}
+
+# --------------------------------
+displaytime(){
+    T=$1 
+    D=0
+    H=0
+    M=0
+    S=0
+    [ $T -gt $((60*60*24)) ] && D=$((T/60/60/24))
+    [ $T -gt $((60*60)) ] && H=$((T/60/60%24))
+    [ $T -gt 60 ] && M=$((T/60%60))
+    S=$((T%60))
+    [ $D -gt 0 ] && printf '%d days ' $D
+    [ $H -gt 0 ] && printf '%d hours ' $H
+    [ $M -gt 0 ] && printf '%d minutes ' $M
+    [[ $D -gt 0 || $H -gt 0 || $M -gt 0 ]] && printf 'and '
+    printf '%d seconds\n' $S
+}
+
+# --------------------------------
+displaytimeshort(){
+    T=$1 
+    D=0
+    H=0
+    M=0
+    S=0
+    [ $T -gt $((60*60*24)) ] && D=$((T/60/60/24))
+    [ $T -gt $((60*60)) ] && H=$((T/60/60%24))
+    [ $T -gt 60 ] && M=$((T/60%60))
+    S=$((T%60))
+    [ $D -gt 0 ] && printf '%dd ' $D
+    printf '%02d:%02d:%02d\n' $H $M $S
+}
+
+# --------------------------------
+vm_export(){
+    VMNAME="$1"
+    RETVAL=0
+
+    if [ -z "$VMNAME" ]
+    then
+        echo -e "\033[0;31mError: must specify vm name\033[0m"
+        return 1    
+    fi
+        
+    echo -e "\e[1m$(date '+%Y-%m-%d %H:%M:%S') - Starting export process for VM [$VMNAME]...\033[0m"
+    VM_PROCESS_START="$(date '+%Y-%m-%d %H:%M:%S')"
+
+    # Get vm ID number
+    VMIDNU=$(vim-cmd vmsvc/getallvms | grep " $VMNAME " | awk '{ print $1 }') # grep with space to get exactly the vm name
+    if [ "$VMIDNU" == "" ]
+    then
+        echo -e "\033[0;31mError: VM [$VMNAME] not found\033[0m"
+        REPORT=$REPORT"<tr class='red'>\r\n\
+            <td>$VMNAME</td>\r\n\
+            <td>Not found</td>\r\n\
+            <td>$VM_PROCESS_START</td>\r\n\
+            <td></td>\r\n\
+            <td></td>\r\n\
+            <td></td>\r\n\
+            <td></td>\r\n\
+            <td>ERR</td>\r\n\
+        </tr>\r\n"
+        return 1    
+    fi
+    
+    # Get vm size
+    VMSIZES="$( getVMSize $VMIDNU )"
+    
+    if [ "$VMSIZES" == "null-null" ]
+    then
+           VMSIZS="Not able to retrieve" 
+    else
+        VMSIZS=$( echo "$VMSIZES" | awk -F '-' '{print $2}' )        
+    fi
+
+    # Get vm vmware-tools status
+    toolsStatus="$( vim-cmd vmsvc/get.guest $VMIDNU "toolsStatus" | grep "toolsStatus" | sed -e 's/\"//g' -e 's/\,//g' | awk -F '=' '{print $2}' | sed -e 's/^ *//g' -e 's/ *$//g' )"
+
+    # Get vm power state and wait to be off
+    VMSTAT=$(vim-cmd vmsvc/power.getstate $VMIDNU | grep Powered)
+    VMINISTAT=$VMSTAT
+
+    if [ "$VMSTAT" != "Powered off" -a "$testmode" != "true" ]
+    then    
+        echo "Stopping VM [$VMNAME]"
+        if [ "$toolsStatus" != "toolsOk" ]
+        then
+            vim-cmd vmsvc/power.off $VMIDNU
+            echo -e "\033[0;36mVMware Tools are not present or outdated in VM: [$VMNAME], power-off issued\033[0m"
+        else
+            vim-cmd vmsvc/power.shutdown $VMIDNU
+        fi    
+
+        wait2shut="30"
+        if [ "$shutdownwait" != "" ]
+        then
+            wait2shut="$shutdownwait"
+        fi        
+        echo "Sleeping ${wait2shut}s, waiting for VM to be off"    
+        sleep "${wait2shut}"
+            
+        VMSTAT=$(vim-cmd vmsvc/power.getstate $VMIDNU | grep Powered)
+        m=0    
+        while [ "$VMSTAT" != "Powered off" ]
+        do
+        if [ "$m" -lt "3" ]
+        then
+            echo "Sleeping 10s, waiting for VM to be off"            
+            sleep 10
+        else
+            if [ "$m" -eq "3" ]
+            then
+                echo -e "\033[0;33mTrying to force power off\033[0m"
+                vim-cmd vmsvc/power.off $VMIDNU
+                echo "Sleeping 20s, waiting for VM to be off"
+                sleep 20
+            fi
+            
+            if [ "$m" -gt "3" ]
+            then
+                echo -e "\033[0;31mError: Can't stop VM [$VMNAME]\033[0m"
+                return 1
+            fi
+        fi
+        m=$(($m+1))
+        VMSTAT=$(vim-cmd vmsvc/power.getstate $VMIDNU | grep Powered)
+        done
+    fi
+    
+    # Create backup directory
+    if [ ! -d "${backuppoint}/$VMNAME" -a "$testmode" != "true" ]
+        then
+            CREATED=$( mkdir -p "${backuppoint}/$VMNAME" )
+            if [ "$CREATED" == ""  ]
+                then
+                    echo -e "\033[0;36mInfo : Directory created at ${backuppoint}/$VMNAME\033[0m"    
+                else
+                    echo -e "\033[0;31mFailed to create directory at ${backuppoint}/$VMNAME, details: $CREATED\033[0m"    
+            fi
+    fi    
+    
+    echo -e "\e[1mStarting VM [$VMNAME] backup\033[0m"
+    if [ "$testmode" != "true" ]
+    then                 
+        $ovftool --acceptAllEulas -o "vi://$esxi_user:$esxi_password@localhost/$VMNAME" "$backuppoint/$VMNAME/$VMNAME.ovf"
+    fi    
+                      
+    if [ $? -ne 0 ]
+    then
+        echo -e "\033[0;31mError: ovftool error, details: $?\033[0m"
+        RETVAL=1
+        CHECKRESULT="ERR"
+        chkclass="red"
+    else
+        CHECKRESULT="OK"
+        chkclass="green"
+    fi    
+
+    if [ "$VMINISTAT" == "Powered on" -a "$testmode" != "true" ]
+    then    
+        echo "Starting VM [$VMNAME]"
+        vim-cmd vmsvc/power.on $VMIDNU 1>/dev/null   
+    fi
+    
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') - End export process for VM [$VMNAME]"
+    
+    VM_PROCESS_END="$(date '+%Y-%m-%d %H:%M:%S')"
+    VM_PROCESS_DURATION=$(( $(date -d "$VM_PROCESS_END" +%s) - $(date -d "$VM_PROCESS_START" +%s) ))
+    VM_PROCESS_DURATION=$( displaytimeshort $VM_PROCESS_DURATION )
+    EXPORTSIZE=$( du -ms "${backuppoint}/$VMNAME" | awk '{print $1}' ) 2>/dev/null
+    if [ "$EXPORTSIZE" == "" ]
+    then
+        EXPORTSIZE="0"
+    fi
+
+    REPORT=$REPORT"<tr class='$chkclass'>\r\n\
+        <td>$VMNAME</td>\r\n\
+        <td>$VMINISTAT</td>\r\n\
+        <td>$VM_PROCESS_START</td>\r\n\
+        <td>$VM_PROCESS_END</td>\r\n\
+        <td>$VM_PROCESS_DURATION</td>\r\n\
+        <td>$VMSIZS</td>\r\n\
+        <td>$EXPORTSIZE</td>\r\n\
+        <td>$CHECKRESULT</td>\r\n\
+    </tr>\r\n"
+
+    return $RETVAL
+}
+
+# --------------------------------
+vm_deploy(){
+    DATASTORE="$1"
+    VMNAME="$2"
+    OVFFILE="$3"
+    RETVAL=0
+
+    if [ -z "$VMNAME" ]
+    then
+        echo -e "\033[0;31mError: must specify vm name\033[0m"
+        return 1    
+    fi
+        
+    echo -e "\e[1m$(date '+%Y-%m-%d %H:%M:%S') - Starting deploy process for VM [$VMNAME]...\033[0m"
+    VM_PROCESS_START="$(date '+%Y-%m-%d %H:%M:%S')"
+    
+    echo -e "\e[1mStarting VM [$VMNAME] deploy\033[0m"
+    if [ "$testmode" != "true" ]
+    then                 
+        $ovftool --acceptAllEulas --diskMode=thin -ds="$DATASTORE" -n="$VMNAME" "$OVFFILE" "vi://$esxi_user:$esxi_password@localhost"
+    fi
+                      
+    if [ $? -ne 0 ]
+    then
+        echo -e "\033[0;31mError: ovftool error, details: $?\033[0m"
+        RETVAL=1
+        CHECKRESULT="ERR"
+        chkclass="red"
+    else
+        CHECKRESULT="OK"
+        chkclass="green"
+    fi    
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') - End deploy process for VM [$VMNAME]"
+
+    echo -e "Get informations for new VM [$VMNAME]"
+    # Get vm ID number
+    VMIDNU=$(vim-cmd vmsvc/getallvms | grep " $VMNAME " | awk '{ print $1 }') # grep with space to get exactly the vm name
+    if [ "$VMIDNU" == "" ]
+    then
+        echo -e "\033[0;31mError: VM [$VMNAME] not found\033[0m"
+        REPORT=$REPORT"<tr class='red'>\r\n\
+            <td>$VMNAME</td>\r\n\
+            <td>Not created</td>\r\n\
+            <td>$VM_PROCESS_START</td>\r\n\
+            <td></td>\r\n\
+            <td></td>\r\n\
+            <td></td>\r\n\
+            <td></td>\r\n\
+            <td>ERR</td>\r\n\
+        </tr>\r\n"
+        return 1    
+    fi
+    
+    # Get vm size
+    VMSIZES="$( getVMSize $VMIDNU )"
+    
+    if [ "$VMSIZES" == "null-null" ]
+    then
+           VMSIZS="Not able to retrieve" 
+    else
+        VMSIZS=$( echo "$VMSIZES" | awk -F '-' '{print $2}' )        
+    fi
+
+    # Get vm vmware-tools status
+    toolsStatus="$( vim-cmd vmsvc/get.guest $VMIDNU "toolsStatus" | grep "toolsStatus" | sed -e 's/\"//g' -e 's/\,//g' | awk -F '=' '{print $2}' | sed -e 's/^ *//g' -e 's/ *$//g' )"
+
+    # Get vm power state and wait to be off
+    VMSTAT=$(vim-cmd vmsvc/power.getstate $VMIDNU | grep Powered)
+    VMINISTAT=$VMSTAT    
+    
+    VM_PROCESS_END="$(date '+%Y-%m-%d %H:%M:%S')"
+    VM_PROCESS_DURATION=$(( $(date -d "$VM_PROCESS_END" +%s) - $(date -d "$VM_PROCESS_START" +%s) ))
+    VM_PROCESS_DURATION=$( displaytimeshort $VM_PROCESS_DURATION )
+    EXPORTSIZE=$( du -ms "$(basename $OVFFILE)" | awk '{print $1}' ) 2>/dev/null
+    if [ "$EXPORTSIZE" == "" ]
+    then
+        EXPORTSIZE="0"
+    fi
+
+    REPORT=$REPORT"<tr class='$chkclass'>\r\n\
+        <td>$VMNAME</td>\r\n\
+        <td>$VMINISTAT</td>\r\n\
+        <td>$VM_PROCESS_START</td>\r\n\
+        <td>$VM_PROCESS_END</td>\r\n\
+        <td>$VM_PROCESS_DURATION</td>\r\n\
+        <td>$VMSIZS</td>\r\n\
+        <td>$EXPORTSIZE</td>\r\n\
+        <td>$CHECKRESULT</td>\r\n\
+    </tr>\r\n"
+
+    return $RETVAL
+}
+
+# --------------------------------

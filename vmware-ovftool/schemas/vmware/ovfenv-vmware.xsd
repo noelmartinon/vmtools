@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Copyright 2008 VMware, Inc.  All rights reserved.
+
+   Remark: The OVF Specification 1.0 Annex D defines a set of relaxations on how 
+   the this XML Schema 1.0 definition is to be interpreted.
+-->
+<xs:schema targetNamespace="http://www.vmware.com/schema/ovfenv"
+    xmlns:vmwenv="http://www.vmware.com/schema/ovfenv"
+    xmlns:ovfenv="http://schemas.dmtf.org/ovf/environment/1"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    attributeFormDefault="qualified"
+    elementFormDefault="qualified">
+
+    <!-- Include and import sections -->
+    <xs:import namespace="http://schemas.dmtf.org/ovf/environment/1"
+        schemaLocation="../DMTF/dsp8027.xsd"/>
+
+    <xs:element name="EthernetAdapterSection" type="vmwenv:EthernetAdapterSection_Type"
+        substitutionGroup="ovfenv:Section">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Section since
+                EthernetAdapter_Type is a derivation of Section_Type </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="EthernetAdapterSection_Type">
+        <xs:annotation>
+            <xs:documentation>Maps between network names and ethernet adapters. In a
+                virtual machine with multiple nics, this allows the guest software to
+                identify the NICs connectiviy based on their MAC
+            address.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovfenv:Section_Type">
+                <xs:sequence>
+                    <xs:element name="Adapter" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:attribute name="mac" type="xs:string">
+                                <xs:annotation>
+                                    <xs:documentation> A MAC address for an ethernet
+                                        adapter in the virtual machine, in default colon
+                                        notation. </xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:attribute name="network" type="xs:string">
+                                <xs:annotation>
+                                    <xs:documentation> The name of the network this MAC
+                                        address is connected to. </xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:anyAttribute namespace="##any" processContents="lax"/>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##any" processContents="lax"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+</xs:schema>
