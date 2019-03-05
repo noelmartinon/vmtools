@@ -9,19 +9,19 @@
 # examples use:
 # /vmfs/volumes/datastore1/vmtools/ovf-export --password="pwdesxi" --backup-point="/path/to/backups_dir" --backup-vms=myvm_name
 #
-# Add manually cron:
-# vi /var/spool/cron/crontabs/root
+# Add manually cron (1st saturday of every month) in current running vmware session:
+# /bin/echo '0   23    *   *   6   [ $(date +\%d) -le 07 ] && /vmfs/volumes/datastore1/vmtools/jobs/job1 > /tmp/ovf-export.$$' >> /var/spool/cron/crontabs/root
 # kill -HUP $(cat /var/run/crond.pid)
 # /usr/lib/vmware/busybox/bin/busybox crond
-# 
+#
 # Set cron for the next boot:
-# vi /etc/rc.local.d/local.sh 
+# vi /etc/rc.local.d/local.sh
 #   /bin/echo '0   23    *   *   6   [ $(date +\%d) -le 07 ] && /vmfs/volumes/datastore1/vmtools/jobs/job1 > /tmp/ovf-export.$$' >> /var/spool/cron/crontabs/root
 #   /bin/kill $(cat /var/run/crond.pid)
-#   /usr/lib/vmware/busybox/bin/busybox crond                
+#   /usr/lib/vmware/busybox/bin/busybox crond
 
 APPNAM="OVF-EXPORT"
-APPVER="1.0.0"
+APPVER="1.1.0"
 COPYRIGHT="(C)2018 Noël MARTINON"
 LICENCE="GPL-2.0"
 
@@ -57,7 +57,7 @@ echo -e
 if [ ! -f "$ovftool" ]
 then
     echo -e "\033[0;31mError: VMware 'ovtool' not found !\033[0m"
-    echo -e "\033[0;31mMore informations in README.md\033[0m"    
+    echo -e "\033[0;31mMore informations in README.md\033[0m"
     exit 1
 fi
 
@@ -112,10 +112,10 @@ then
 fi
 
 if [ "$testmode" == "true" ]
-then         
+then
     warning_testmode="TEST MODE ACTIVATED, REMOVE --test-mode=true TO MAKE A BACKUP"
-    echo -e "\033[0;33mTEST MODE ACTIVATED, REMOVE --test-mode=true TO MAKE A BACKUP\033[0m" 
-    subject=$subject" [Test mode]"      	
+    echo -e "\033[0;33mTEST MODE ACTIVATED, REMOVE --test-mode=true TO MAKE A BACKUP\033[0m"
+    subject=$subject" [Test mode]"
 fi
 
 # If process is already running then exit
@@ -147,7 +147,7 @@ do
         PROCESS_ERROR=1
     fi
 done
-IFS=$OLDIFS  
+IFS=$OLDIFS
 PROCESS_ELAPSE=$((`date +%s` - $PROCESS_START))
 ELAPSE=$( displaytime $PROCESS_ELAPSE )
 
@@ -162,7 +162,7 @@ then
     subject=$subject" - Error"
 fi
 
-emailmsg="$( cat $BASEDIR/templates/email.html )" 
+emailmsg="$( cat $BASEDIR/templates/email.html )"
 emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__TITLE__/$APPNAM $APPVER report/g" -e "s/__APPVER__/$HAPPVER/g" )
 emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__SUBTITLE__/$COPYRIGHT - $LICENCE/g" )
 emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__HOSTNAME__/$(hostname)/g" -e "s/__HOSTIP__/$HOSTIP/g" -e "s/__HOSTMASK__/$HOSTMASK/g" )

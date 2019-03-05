@@ -39,15 +39,15 @@ getAllFiles(){
             if [ -f "$fvmdk" ]
             then
                 echo "DISK=${fvmdk}"
-            fi        
+            fi
         done
         for fvmsn in "$folder"/*.vmsn
         do
             if [ -f "$fvmsn" ]
             then
                 echo "DISK=${fvmsn}"
-            fi          
-        done    
+            fi
+        done
         done
         IFS=$OLDIFS
     fi
@@ -118,7 +118,7 @@ getVMSize(){
             else
                 aparentsize=0
             fi
-        echo "$realsize"-"$aparentsize"        
+        echo "$realsize"-"$aparentsize"
     else
         echo "null-null"
     fi
@@ -133,7 +133,7 @@ get_option(){
 
 # --------------------------------
 displaytime(){
-    T=$1 
+    T=$1
     D=0
     H=0
     M=0
@@ -151,7 +151,7 @@ displaytime(){
 
 # --------------------------------
 displaytimeshort(){
-    T=$1 
+    T=$1
     D=0
     H=0
     M=0
@@ -172,9 +172,9 @@ vm_export(){
     if [ -z "$VMNAME" ]
     then
         echo -e "\033[0;31mError: must specify vm name\033[0m"
-        return 1    
+        return 1
     fi
-        
+
     echo -e "\e[1m$(date '+%Y-%m-%d %H:%M:%S') - Starting export process for VM [$VMNAME]...\033[0m"
     VM_PROCESS_START="$(date '+%Y-%m-%d %H:%M:%S')"
 
@@ -193,17 +193,17 @@ vm_export(){
             <td></td>\r\n\
             <td>ERR</td>\r\n\
         </tr>\r\n"
-        return 1    
+        return 1
     fi
-    
+
     # Get vm size
     VMSIZES="$( getVMSize $VMIDNU )"
-    
+
     if [ "$VMSIZES" == "null-null" ]
     then
-           VMSIZS="Not able to retrieve" 
+           VMSIZS="Not able to retrieve"
     else
-        VMSIZS=$( echo "$VMSIZES" | awk -F '-' '{print $2}' )        
+        VMSIZS=$( echo "$VMSIZES" | awk -F '-' '{print $2}' )
     fi
 
     # Get vm vmware-tools status
@@ -214,7 +214,7 @@ vm_export(){
     VMINISTAT=$VMSTAT
 
     if [ "$VMSTAT" != "Powered off" -a "$testmode" != "true" ]
-    then    
+    then
         echo "Stopping VM [$VMNAME]"
         if [ "$toolsStatus" != "toolsOk" ]
         then
@@ -222,23 +222,23 @@ vm_export(){
             echo -e "\033[0;36mVMware Tools are not present or outdated in VM: [$VMNAME], power-off issued\033[0m"
         else
             vim-cmd vmsvc/power.shutdown $VMIDNU
-        fi    
+        fi
 
         wait2shut="30"
         if [ "$shutdownwait" != "" ]
         then
             wait2shut="$shutdownwait"
-        fi        
-        echo "Sleeping ${wait2shut}s, waiting for VM to be off"    
+        fi
+        echo "Sleeping ${wait2shut}s, waiting for VM to be off"
         sleep "${wait2shut}"
-            
+
         VMSTAT=$(vim-cmd vmsvc/power.getstate $VMIDNU | grep Powered)
-        m=0    
+        m=0
         while [ "$VMSTAT" != "Powered off" ]
         do
         if [ "$m" -lt "3" ]
         then
-            echo "Sleeping 10s, waiting for VM to be off"            
+            echo "Sleeping 10s, waiting for VM to be off"
             sleep 10
         else
             if [ "$m" -eq "3" ]
@@ -248,7 +248,7 @@ vm_export(){
                 echo "Sleeping 20s, waiting for VM to be off"
                 sleep 20
             fi
-            
+
             if [ "$m" -gt "3" ]
             then
                 echo -e "\033[0;31mError: Can't stop VM [$VMNAME]\033[0m"
@@ -259,25 +259,25 @@ vm_export(){
         VMSTAT=$(vim-cmd vmsvc/power.getstate $VMIDNU | grep Powered)
         done
     fi
-    
+
     # Create backup directory
     if [ ! -d "${backuppoint}/$VMNAME" -a "$testmode" != "true" ]
         then
             CREATED=$( mkdir -p "${backuppoint}/$VMNAME" )
             if [ "$CREATED" == ""  ]
                 then
-                    echo -e "\033[0;36mInfo : Directory created at ${backuppoint}/$VMNAME\033[0m"    
+                    echo -e "\033[0;36mInfo : Directory created at ${backuppoint}/$VMNAME\033[0m"
                 else
-                    echo -e "\033[0;31mFailed to create directory at ${backuppoint}/$VMNAME, details: $CREATED\033[0m"    
+                    echo -e "\033[0;31mFailed to create directory at ${backuppoint}/$VMNAME, details: $CREATED\033[0m"
             fi
-    fi    
-    
+    fi
+
     echo -e "\e[1mStarting VM [$VMNAME] backup\033[0m"
     if [ "$testmode" != "true" ]
-    then                 
-        $ovftool --acceptAllEulas -o "vi://$esxi_user:$esxi_password@localhost/$VMNAME" "$backuppoint/$VMNAME/$VMNAME.ovf"
-    fi    
-                      
+    then
+        $ovftool --acceptAllEulas --noSSLVerify -o "vi://$esxi_user:$esxi_password@localhost/$VMNAME" "$backuppoint/$VMNAME/$VMNAME.ovf"
+    fi
+
     if [ $? -ne 0 ]
     then
         echo -e "\033[0;31mError: ovftool error, details: $?\033[0m"
@@ -287,16 +287,16 @@ vm_export(){
     else
         CHECKRESULT="OK"
         chkclass="green"
-    fi    
+    fi
 
     if [ "$VMINISTAT" == "Powered on" -a "$testmode" != "true" ]
-    then    
+    then
         echo "Starting VM [$VMNAME]"
-        vim-cmd vmsvc/power.on $VMIDNU 1>/dev/null   
+        vim-cmd vmsvc/power.on $VMIDNU 1>/dev/null
     fi
-    
+
     echo -e "$(date '+%Y-%m-%d %H:%M:%S') - End export process for VM [$VMNAME]"
-    
+
     VM_PROCESS_END="$(date '+%Y-%m-%d %H:%M:%S')"
     VM_PROCESS_DURATION=$(( $(date -d "$VM_PROCESS_END" +%s) - $(date -d "$VM_PROCESS_START" +%s) ))
     VM_PROCESS_DURATION=$( displaytimeshort $VM_PROCESS_DURATION )
@@ -330,18 +330,18 @@ vm_deploy(){
     if [ -z "$VMNAME" ]
     then
         echo -e "\033[0;31mError: must specify vm name\033[0m"
-        return 1    
+        return 1
     fi
-        
+
     echo -e "\e[1m$(date '+%Y-%m-%d %H:%M:%S') - Starting deploy process for VM [$VMNAME]...\033[0m"
     VM_PROCESS_START="$(date '+%Y-%m-%d %H:%M:%S')"
-    
+
     echo -e "\e[1mStarting VM [$VMNAME] deploy\033[0m"
     if [ "$testmode" != "true" ]
-    then                 
-        $ovftool --acceptAllEulas --diskMode=thin -ds="$DATASTORE" -n="$VMNAME" "$OVFFILE" "vi://$esxi_user:$esxi_password@localhost"
+    then
+        $ovftool --acceptAllEulas --noSSLVerify --diskMode=thin -ds="$DATASTORE" -n="$VMNAME" "$OVFFILE" "vi://$esxi_user:$esxi_password@localhost"
     fi
-                      
+
     if [ $? -ne 0 ]
     then
         echo -e "\033[0;31mError: ovftool error, details: $?\033[0m"
@@ -351,7 +351,7 @@ vm_deploy(){
     else
         CHECKRESULT="OK"
         chkclass="green"
-    fi    
+    fi
     echo -e "$(date '+%Y-%m-%d %H:%M:%S') - End deploy process for VM [$VMNAME]"
 
     echo -e "Get informations for new VM [$VMNAME]"
@@ -370,17 +370,17 @@ vm_deploy(){
             <td></td>\r\n\
             <td>ERR</td>\r\n\
         </tr>\r\n"
-        return 1    
+        return 1
     fi
-    
+
     # Get vm size
     VMSIZES="$( getVMSize $VMIDNU )"
-    
+
     if [ "$VMSIZES" == "null-null" ]
     then
-           VMSIZS="Not able to retrieve" 
+           VMSIZS="Not able to retrieve"
     else
-        VMSIZS=$( echo "$VMSIZES" | awk -F '-' '{print $2}' )        
+        VMSIZS=$( echo "$VMSIZES" | awk -F '-' '{print $2}' )
     fi
 
     # Get vm vmware-tools status
@@ -388,8 +388,8 @@ vm_deploy(){
 
     # Get vm power state and wait to be off
     VMSTAT=$(vim-cmd vmsvc/power.getstate $VMIDNU | grep Powered)
-    VMINISTAT=$VMSTAT    
-    
+    VMINISTAT=$VMSTAT
+
     VM_PROCESS_END="$(date '+%Y-%m-%d %H:%M:%S')"
     VM_PROCESS_DURATION=$(( $(date -d "$VM_PROCESS_END" +%s) - $(date -d "$VM_PROCESS_START" +%s) ))
     VM_PROCESS_DURATION=$( displaytimeshort $VM_PROCESS_DURATION )

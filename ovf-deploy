@@ -10,7 +10,7 @@
 # /vmfs/volumes/datastore1/vmtools/ovf-deploy --password="pwdesxi" --ovf-file="/path/to/file.ovf" --vm-name="new_vm_name"
 
 APPNAM="OVF-DEPLOY"
-APPVER="1.0.0"
+APPVER="1.1.0"
 COPYRIGHT="(C)2018 Noël MARTINON"
 LICENCE="GPL-2.0"
 
@@ -46,7 +46,7 @@ echo -e
 if [ ! -f "$ovftool" ]
 then
     echo -e "\033[0;31mError: VMware 'ovtool' not found !\033[0m"
-    echo -e "\033[0;31mMore informations in README.md\033[0m"    
+    echo -e "\033[0;31mMore informations in README.md\033[0m"
     exit 1
 fi
 
@@ -147,10 +147,10 @@ then
 fi
 
 if [ "$testmode" == "true" ]
-then         
+then
     warning_testmode="TEST MODE ACTIVATED, REMOVE --test-mode=true TO MAKE A DEPLOY"
-    echo -e "\033[0;33mTEST MODE ACTIVATED, REMOVE --test-mode=true TO MAKE A DEPLOY\033[0m" 
-    subject=$subject" [Test mode]"      	
+    echo -e "\033[0;33mTEST MODE ACTIVATED, REMOVE --test-mode=true TO MAKE A DEPLOY\033[0m"
+    subject=$subject" [Test mode]"
 fi
 
 # Start process
@@ -170,7 +170,7 @@ then
     subject=$subject" - Error"
 fi
 
-emailmsg="$( cat $BASEDIR/templates/email.html )" 
+emailmsg="$( cat $BASEDIR/templates/email.html )"
 emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__TITLE__/$APPNAM $APPVER report/g" -e "s/__APPVER__/$HAPPVER/g" )
 emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__SUBTITLE__/$COPYRIGHT - $LICENCE/g" )
 emailmsg=$( echo -n "${emailmsg}" | sed -e "s/__HOSTNAME__/$(hostname)/g" -e "s/__HOSTIP__/$HOSTIP/g" -e "s/__HOSTMASK__/$HOSTMASK/g" )

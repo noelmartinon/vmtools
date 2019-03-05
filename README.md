@@ -1,11 +1,11 @@
 # VMtools
-Version 1.0.0
+Version 1.1.0
 
 Tools for VMware ESXi to use in ESXi
 
 The tools included in the VMtools suite are:
-- **ovf-export** 1.0.0 - export/backup one or more virtual machines to OVF format
-- **ovf-deploy** 1.0.0 - deploy/restore a virtual machine from OVF template
+- **ovf-export** 1.1.0 - export/backup one or more virtual machines to OVF format
+- **ovf-deploy** 1.1.0 - deploy/restore a virtual machine from OVF template
 - **rsync-static** 3.1.3 - a pre-build static rsync version (see usage in https://rsync.samba.org/)
 
 ## Table of contents

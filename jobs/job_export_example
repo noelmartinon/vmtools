@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Add cron and restart cron daemon:
-# echo '0   23    *   *   6   /vmfs/volumes/datastore1/vmtools/jobs/job_example > /tmp/ovf-export.log' >> /var/spool/cron/crontabs/root
+# echo '0   23    *   *   6   [ $(date +\%d) -le 07 ] && /vmfs/volumes/datastore1/vmtools/jobs/job_example > /tmp/ovf-export.log' >> /var/spool/cron/crontabs/root
 # /bin/kill $(cat /var/run/crond.pid) ; /usr/lib/vmware/busybox/bin/busybox crond
 
 "/vmfs/volumes/datastore1/vmtools/ovf-export" \
